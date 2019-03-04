@@ -1,4 +1,4 @@
-# Tomato Timer
+# 🍅 Tomato Timer
 
 **Demo: tomato-timer.now.sh**
 
