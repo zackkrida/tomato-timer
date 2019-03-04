@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A simple pomodoro-inspired timer app">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Tomato Timer</title>
+  <style>
+    .tomato {
+      --bg: #d33a2d;
+      --text: #fff;
+    }
+
+    .dark {
+      --bg: #000;
+      --text: #fff;
+    }
+
+
+    *,
+    *:before,
+    *:after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .app {
+      -webkit-font-smoothing: antialiased;
+      transition: .2s ease-in-out;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      text-shadow: 1px 1px 1px rgba(0, 0, 0, .25);
+    }
+
+    .title {
+      font-weight: 400;
+      font-size: 30px;
+    }
+
+    .time {
+      font-weight: 600;
+      font-size: 86px;
+    }
+
+    .timer {
+      padding: 60px;
+      border: 2px solid var(--bg);
+      transition: .2s all ease-in-out;
+      box-shadow: 0 2px 2px rgba(0, 0, 0, 0);
+      border-radius: 4px;
+    }
+
+    .timer:hover {
+      transform: scale(1.04);
+      border: 2px solid #fff;
+      box-shadow: 0 10px 10px rgba(0, 0, 0, .25);
+    }
+
+    button {
+      -webkit-appearance: none;
+      padding: 4px 12px;
+      background-color: transparent;
+      border: 2px solid #fff;
+      color: #fff;
+      cursor: pointer;
+      margin: 4px;
+      font-size: 18px;
+      transition: .1s ease-in;
+      box-shadow: 0px 2px 0px rgba(0, 0, 0, .25);
+
+    }
+
+    button:hover:not(:disabled),
+    button:focus:not(:disabled) {
+      outline: 0;
+      background-color: var(--text);
+      color: #000;
+      transform: scale(1.06);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+    }
+  </style>
+  <script type="module">
+    // Details here: https://github.com/developit/htm
+    import { html, Component, render } from 'https://unpkg.com/htm/preact/standalone.mjs'
+
+    function formatTime(ms) {
+      return [
+        parseInt(ms / 1000 / 60 % 60),
+        parseInt(ms / 1000 % 60)
+      ]
+        .join(":")
+        .replace(/\b(\d)\b/g, "0$1")
+    }
+
+    class App extends Component {
+
+      state = {
+        theme: 'tomato',
+        startTime: 15 * 60 * 1000,
+        clock: null,
+        interval: null,
+        formattedTime: formatTime(15 * 60 * 1000)
+      }
+
+      componentDidMount() {
+        this.setState({ clock: this.state.startTime })
+      }
+
+      play = () => {
+        if (this.state.interval) return
+        this.update()
+        let interval = setInterval(this.update, 1000) // run update every second
+        this.setState({ interval })
+      }
+
+      pause = () => {
+        if (!this.state.interval) return
+        clearInterval(this.state.interval)
+        this.setState({ interval: null })
+      }
+
+      update = () => {
+        let formattedTime = formatTime(this.state.clock)
+        this.setState({
+          clock: this.state.clock - 1000,
+          formattedTime
+        })
+        document.title = `(${formattedTime}) 🍅 Tomato Timer`
+      }
+
+      reset = () => {
+        if (this.state.interval) this.pause()
+        this.setState({
+          clock: this.state.startTime,
+          formattedTime: formatTime(this.state.startTime)
+        })
+      }
+
+      setTheme = (e) => {
+        this.setState({ theme: e.target.value })
+      }
+
+      setMode = (e) => {
+        const newTime = e.target.value
+
+        this.reset()
+        this.setState({
+          startTime: newTime,
+          clock: newTime,
+          formattedTime: formatTime(newTime)
+        })
+      }
+
+      render(props, { startTime, theme, interval, formattedTime }) {
+        return html`
+          <div class="${'app ' + theme}">
+            <div class="timer">
+
+              <label for="mode">
+                Mode:
+                <select value=${startTime} name="mode" onChange=${this.setMode}>
+                  <option value=${15 * 60 * 1000}>Work</option>
+                  <option value=${5 * 60 * 1000}>Break</option>
+                </select>
+              </label>
+
+              <label for="theme">
+                Theme:
+                <select name="theme" value=${theme} onChange=${this.setTheme}>
+                  <option value="tomato">Tomato</option>
+                  <option value="dark">Dark</option>
+                </select>
+              </label>
+
+              <h1 class="title">Tomato Timer<//>
+              <p>A simple timer app.</p>
+
+              <p class="time">${formattedTime}</p>
+              <button disabled=${interval} onClick=${this.play}>Start<//>
+              <button disabled=${!interval} onClick=${this.pause}>Stop<//>
+              <button onClick=${this.reset}>Reset<//>
+            </div>
+          </div>
+        `
+      }
+    }
+
+    render(html`<${App} />`, document.body)
+  </script>
+</head>
+
+</html>
