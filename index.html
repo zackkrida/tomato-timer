@@ -49,6 +49,7 @@
 
     .time {
       font-weight: 600;
+      font-variant-numeric: tabular-nums;
       font-size: 86px;
     }
 
@@ -108,7 +109,7 @@
     class App extends Component {
 
       state = {
-        theme: 'tomato',
+        theme: 'dark',
         startTime: 15 * 60 * 1000,
         clock: null,
         interval: null,
